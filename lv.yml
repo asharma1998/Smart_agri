@@ -1,0 +1,71 @@
+- hosts: 192.168.43.185
+  vars_prompt:
+  - name: x
+    prompt: "Enter the size of lv"
+    private: false
+  - name: y
+    prompt: "IN G and M "
+    private: false
+  - name: z
+    prompt: "username"
+    private: false
+
+  tasks:
+  - name: partions
+ 
+    parted:
+      device: /dev/sdb
+      number: 1
+      state: present
+      part_end: 50GiB
+  
+  - name: vg create
+  
+    lvg:
+      vg: myvg
+      pvs: /dev/sdb1
+  
+  - name: lvcreate
+  
+    lvol:
+     vg: myvg
+     lv: "{{z}}"
+     size: "{{ x }}{{ y }}"
+  
+  - name: filesystem  
+    filesystem: 
+     fstype: ext4
+     dev: "/dev/myvg/{{z}}"
+  
+  - name: mounting
+    mount: 
+     name: "/{{z}}"
+     src: "/dev/myvg/{{z}}"
+     fstype: ext4
+     state: mounted
+  
+  - name: firewall
+    service: 
+      name: "firewalld"
+      state: "stopped"
+  
+  - name: service
+    service:
+      name: "nfs"
+      state: "started"
+      enabled: "true"
+
+  - name: file
+    lineinfile:
+        path: /etc/exports
+        create: yes
+        line: "/{{z}} 192.168.43.126(rw,no_root_squash)"
+        state: present
+  - name: "export nfs"
+    command: "exportfs -rv"
+ 
+  - name: service
+    service: 
+      name: "nfs"
+      state: "restarted"
+      enabled: "true"  

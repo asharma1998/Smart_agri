@@ -1,0 +1,40 @@
+---
+- hosts: all
+  tasks:
+  - package:
+     name: "nfs-utils"
+     state: "present"
+  - service:
+     name: "nfs"
+     state: "started"
+     enabled: "yes"
+  - service:
+     name: "firewalld"
+     state: "started"
+     enabled: "yes"
+  - firewalld:
+     service: "nfs"
+     state: "enabled"
+     immediate: true
+     permanent: true
+  - parted:
+     device: "/dev/sdb"
+     state: "present"
+     part_end: "50MiB"
+     number: "7"
+  - filesystem:
+     fstype: "ext4"
+     dev: "/dev/sdb7"
+  - file:
+     path: "/nfs_share"
+     state: "directory"
+  - mount:
+     path: "/nfs_share"
+     src: "/dev/sdb7"
+     fstype: "ext4"
+     opts: "defaults"
+     state: "present"
+  - copy:
+     content: "/nfs_share 192.168.100.108(rw)"
+     dest: "/etc/exports"
+   

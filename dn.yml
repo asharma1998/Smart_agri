@@ -1,0 +1,20 @@
+
+- hosts: one
+  tasks:
+   - copy:
+      src: "/root/project/files/hadoop-1.2.1-1.x86_64.rpm"
+      dest: "/root/"
+
+   - command: "rpm -ivh  /root/hadoop-1.2.1-1.x86_64.rpm  --force"
+
+   - template:
+      src: "/root/project/files/datanode.xml"
+      dest: "/etc/hadoop/hdfs-site.xml"
+
+   - template:
+      src: "/root/project/files/core-site.xml"
+      dest: "/etc/hadoop/core-site.xml"
+
+   - command: "hadoop-daemon.sh  start  datanode"
+
+

@@ -1,0 +1,16 @@
+- hosts: 192.168.43.126 
+  vars_prompt:
+  - name: x 
+    prompt: "enter the name "
+    private: false
+  tasks: 
+  - name: filesystem
+    file:
+     path: "/media/{{ x }} "
+     state: directory
+  - name: mounting
+    mount: 
+      name: "/media/{{x}}" 
+      src: "192.168.43.185:/{{x}}"
+      fstype: nfs
+      state: mounted
